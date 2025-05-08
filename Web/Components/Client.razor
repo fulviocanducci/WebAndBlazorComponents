@@ -1,0 +1,39 @@
+﻿@page "/cadastro"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Web
+@using Web.Models
+<h3>Cadastro de Usuário</h3>
+<EditForm Model="usuario" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div>
+        <label>Nome:</label><br />
+        <InputText @bind-Value="usuario.Nome" class="form-control" />
+        <ValidationMessage For="@(() => usuario.Nome)" />
+    </div>
+    <div>
+        <label>E-mail:</label><br />
+        <InputText @bind-Value="usuario.Email" class="form-control" />
+        <ValidationMessage For="@(() => usuario.Email)" />
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary">Cadastrar</button>
+</EditForm>
+@if (sucesso)
+{
+    <p class="text-success">Cadastro realizado com sucesso!</p>
+}
+@code {
+    private UsuarioModel usuario = new();
+    private bool sucesso = false;
+
+    private void HandleValidSubmit()
+    {
+        // Aqui você pode salvar no banco, chamar API, etc.
+        sucesso = true;
+    }
+
+    
+}

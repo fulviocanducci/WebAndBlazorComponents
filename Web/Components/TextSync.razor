@@ -1,0 +1,22 @@
+﻿@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+<Header Title="Sincronização de Texto"></Header>
+<p>Digite algo no campo abaixo:</p>
+<input type="text" @bind="inputText" @oninput="OnInputChanged" class="form-control form-control-sm" placeholder="Digite algo..." />
+<p><strong>Texto sincronizado:</strong> @inputText</p>
+@code {
+   [Parameter]
+   public string? InputText { get; set; }
+
+   private string inputText = string.Empty;
+
+   protected override void OnInitialized()
+   {
+      inputText = InputText ?? string.Empty;
+   }
+
+   private void OnInputChanged(ChangeEventArgs e)
+   {
+      inputText = $"{e.Value}"; 
+   }
+}

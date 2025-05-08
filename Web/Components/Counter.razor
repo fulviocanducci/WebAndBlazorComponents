@@ -1,0 +1,13 @@
+﻿@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Web
+<Header Title="Contador"></Header>
+<p>Valor atual: @count</p>
+<button @onclick="Increment">Incrementar</button>
+@code {
+   private int count = 0;
+
+   private void Increment()
+   {
+      count++;
+   }
+}

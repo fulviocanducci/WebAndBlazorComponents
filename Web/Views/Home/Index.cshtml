@@ -1,0 +1,11 @@
+﻿@{
+   ViewData["Title"] = "Home Page";
+   string name = "Fulvio";
+}
+@using Web.Components;
+<div>
+   <component type="typeof(Counter)" render-mode="ServerPrerendered" />
+</div>
+<div>
+   <component type="typeof(TextSync)" render-mode="ServerPrerendered" param-InputText="name" />
+</div>
