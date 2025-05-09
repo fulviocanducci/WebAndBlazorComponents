@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using Web.Models;
+using MudBlazor.Services;
 namespace Web
 {
    public class Program
@@ -5,10 +8,14 @@ namespace Web
       public static void Main(string[] args)
       {
          WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+         builder.Services.AddMudServices();
          builder.Services.AddControllersWithViews();
          builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents(); // Ou WebAssembly se quiser
-
+         builder.Services.AddDbContext<Db>(options =>
+         {
+            options.UseInMemoryDatabase("InMemoryDb");
+         });
          WebApplication app = builder.Build();
          if (!app.Environment.IsDevelopment())
          {

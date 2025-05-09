@@ -3,37 +3,113 @@
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Web
+@using System.Text.Json
+@using System.Text
 @using Web.Models
+@using MudBlazor
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
 <h3>Cadastro de Usuário</h3>
 <EditForm Model="usuario" OnValidSubmit="HandleValidSubmit">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
-    <div>
-        <label>Nome:</label><br />
-        <InputText @bind-Value="usuario.Nome" class="form-control" />
-        <ValidationMessage For="@(() => usuario.Nome)" />
-    </div>
-    <div>
-        <label>E-mail:</label><br />
-        <InputText @bind-Value="usuario.Email" class="form-control" />
-        <ValidationMessage For="@(() => usuario.Email)" />
-    </div>
-    <br />
-    <button type="submit" class="btn btn-primary">Cadastrar</button>
+   <DataAnnotationsValidator />
+   <ValidationSummary />
+   <div>
+      <label>Nome:</label><br />
+      <InputText @bind-Value="usuario.Nome" class="form-control" />
+      <ValidationMessage For="@(() => usuario.Nome)" />
+   </div>
+   <div>
+      <label>E-mail:</label><br />
+      <InputText @bind-Value="usuario.Email" class="form-control" />
+      <ValidationMessage For="@(() => usuario.Email)" />
+   </div>
+   <br />
+   <button type="submit" class="btn btn-primary">Cadastrar</button>
 </EditForm>
 @if (sucesso)
 {
-    <p class="text-success">Cadastro realizado com sucesso!</p>
+   <p class="text-success mt-2 mb-2">Cadastro realizado com sucesso!</p>
 }
+<div>
+   <table class="table table-sm table-bordered table-hover">
+      <thead>
+         <tr>
+            <th>Nome</th>
+            <th>Email</th>
+         </tr>
+      </thead>
+      <tbody>
+         @foreach (var cliente in usuarios)
+         {
+            <tr>
+               <td>@cliente.Nome</td>
+               <td>@cliente.Email</td>
+            </tr>
+         }
+      </tbody>
+   </table>
+</div>
+<MudTable Items="@usuarios" SortLabel="Ordenar por" Hover="true" Filter="FilterClientes">
+    <ToolBarContent>
+        <MudTextField @bind-Value="searchText" Placeholder="Filtrar..." />
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh SortBy="Nome">Nome</MudTh>
+        <MudTh SortBy="Email">Email</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Nome">@context.Nome</MudTd>
+        <MudTd DataLabel="Email">@context.Email</MudTd>
+    </RowTemplate>
+</MudTable>
 @code {
-    private UsuarioModel usuario = new();
-    private bool sucesso = false;
+   private string searchText = "";
+   private UsuarioModel usuario = new();
+   private bool sucesso = false;
+   private List<UsuarioModel> usuarios = new List<UsuarioModel>();
+   private Uri url = new Uri("https://localhost:7273");
+   private HttpClient httpClient = new HttpClient();
+   private bool FilterClientes(UsuarioModel usuario)
+   {
+      if (string.IsNullOrWhiteSpace(searchText))
+         return true;
 
-    private void HandleValidSubmit()
-    {
-        // Aqui você pode salvar no banco, chamar API, etc.
-        sucesso = true;
-    }
+      return usuario.Nome.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+          || usuario.Email.Contains(searchText, StringComparison.OrdinalIgnoreCase);
+   }
+   private async Task HandleValidSubmit()
+   {
+      HttpResponseMessage result = await httpClient
+         .PostAsync("/api/client", new StringContent(JsonSerializer.Serialize(usuario), Encoding.UTF8, "application/json"));
+      if (result.IsSuccessStatusCode)
+      {
+         await LoadUsuariosAsync();
+         sucesso = true;
+         usuario = new UsuarioModel();
+      }
+      sucesso = false;
+   }
 
-    
+   protected override async Task OnInitializedAsync()
+   {
+      httpClient.BaseAddress = url;
+      await LoadUsuariosAsync();
+   }
+
+   private async Task LoadUsuariosAsync()
+   {
+      HttpResponseMessage response = await httpClient.GetAsync("/api/client");
+      if (response.IsSuccessStatusCode)
+      {
+         string json = await response.Content.ReadAsStringAsync();
+         if (!string.IsNullOrEmpty(json))
+         {
+            usuarios = 
+               JsonSerializer.Deserialize<List<UsuarioModel>>(json) ?? 
+               new List<UsuarioModel>();
+         }
+      }
+   }
 }
